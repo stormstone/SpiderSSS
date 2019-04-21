@@ -464,13 +464,134 @@ print(driver.page_source)  # 返回浏览器渲染后页面
 
 ##### 2.6.1 页面操作
 
+**页面交互：**
+
+Selenium主要用来和页面交互，比如点击，输入等等。那么前提就是要找到页面中的元素。WebDriver提供了各种方法来寻找元素。
+
+例如下面有一个表单输入框：
+
+```html
+<input type="text" name="passwd" id="passwd-id" />
+```
+
+我们可以这样获取它：
+
+```python
+element = driver.find_element_by_id("passwd-id")
+element = driver.find_element_by_name("passwd")
+element = driver.find_elements_by_tag_name("input")
+element = driver.find_element_by_xpath("//input[@id='passwd-id']")
+```
+
+find_element返回一个元素，find_elements返回所有符合条件的元素列表。
+
+在用 xpath 的时候还需要注意的是，用`find_element_by_xpath`时如果有多个元素匹配了 xpath，它只会返回第一个匹配的元素。如果没有找到，那么会抛出 NoSuchElementException 的异常。
+
+获取了input元素之后，向文本框输入内容，可以利用下面`send_keys()`方法：
+
+```python
+element.clear()  # 清除默认文本
+element.send_keys("some text")
+```
+
+**下拉选项卡：**
+
+WebDriver 中提供了一个叫 Select 的方法来操作。
+
+```python
+from selenium.webdriver.support.ui import Select
+
+select = Select(driver.find_element_by_name('name'))
+select.select_by_index(index)
+select.select_by_visible_text("text")
+select.select_by_value(value)
+# 全部取消选择
+select = Select(driver.find_element_by_id('id'))
+select.deselect_all()
+# 获取所有的已选选项
+select = Select(driver.find_element_by_xpath("xpath"))
+all_selected_options = select.all_selected_options
+```
+
+它可以根据索引来选择，可以根据值来选择，可以根据文字来选择，十分方便。
+
+**Cookies处理：**
+
+```python
+# 为页面添加Cookies
+driver.get("http://www.example.com")
+cookie = {'name': 'foo', 'value': 'bar'}
+driver.add_cookie(cookie)
+# 获取页面Cookies，用法如下
+driver.get("http://www.example.com")
+driver.get_cookies()
+```
+
+##### 2.6.2 元素选取
+
+单个元素选取：
+
+- find_element_by_id
+- find_element_by_name
+- find_element_by_xpath
+- find_element_by_link_text
+- find_element_by_partial_link_text
+- find_element_by_tag_name
+- find_element_by_class_name
+- find_element_by_css_selector
+
+多个元素选取：
+
+- find_elements_by_name
+- find_elements_by_xpath
+- find_elements_by_link_text
+- find_elements_by_partial_link_text
+- find_elements_by_tag_name
+- find_elements_by_class_name
+- find_elements_by_css_selector
+
+##### 2.6.3 页面等待
+
+现在的网页越来越多采用了 Ajax 技术，这样程序便不能确定何时某个元素完全加载出来了。这会让元素定位困难而且会提高产生 ElementNotVisibleException 的概率。
+
+所以 Selenium 提供了两种等待方式，一种是隐式等待，一种是显式等待。
+
+隐式等待是等待特定的时间，显式等待是指定某一条件直到这个条件成立时继续执行。
+
+**显式等待**
+
+显式等待指定某个条件，然后设置最长等待时间。如果在这个时间还没有找到元素，那么便会抛出异常了。
+
+```python
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+driver = webdriver.Chrome()
+driver.get("http://somedomain/url_that_delays_loading")
+try:
+    element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "myDynamicElement"))
+    )
+finally:
+    driver.quit()
+```
+
+**隐式等待**
+
+隐式等待比较简单，就是简单地设置一个等待时间，单位为秒。
+
+```python
+driver = webdriver.Chrome()
+driver.implicitly_wait(10)  # seconds
+driver.get("http://somedomain/url_that_delays_loading")
+myDynamicElement = driver.find_element_by_id("myDynamicElement")
+```
 
 
 
-
-
-
-
+其他更多用法参见官方文档。
 
 selenium官网：https://www.seleniumhq.org/docs/index.jsp
 
@@ -479,6 +600,88 @@ selenium-python文档：https://selenium-python.readthedocs.io/index.html
 
 
 #### 2.7 PyQuery库基本使用
+
+安装：`pip install pyquery`
+
+一个和jQuery极像的python包，pyquery 可让你用 jQuery 的语法来对 xml 进行操作。和 jQuery 十分类似。如果利用 lxml，pyquery 对 xml 和 html 的处理将更快。
+
+这个库不是一个可以和 JavaScript交互的代码库，它只是非常像 jQuery API 而已。
+
+##### 2.7.1 初始化
+
+```python
+from pyquery import PyQuery as pq
+from lxml import etree
+
+# 初始化
+# 1）直接字符串
+# pq 参数可以直接传入 HTML 代码，doc 现在就相当于 jQuery 里面的 $ 符号了。
+doc = pq("<html></html>")
+# 2）lxml.etree
+# 可以首先用 lxml 的 etree 处理一下代码，这样如果你的 HTML 代码出现一些不完整或者疏漏，
+# 都会自动转化为完整清晰结构的 HTML代码。
+doc = pq(etree.fromstring("<html></html>"))
+# 3）直接传URL
+# 就像直接请求了一个网页一样，类似用 urllib2 来直接请求这个链接，得到 HTML 代码。
+doc = pq('http://www.baidu.com')
+# 4）传文件
+# 直接传某个路径的文件名。
+doc = pq(filename='hello.html')
+```
+
+PyQuery 初始化之后，返回类型是 PyQuery，利用了选择器筛选一次之后，返回结果的类型依然还是 PyQuery，这和 jQuery 如出一辙。 BeautifulSoup 和 XPath 返回的是列表，不能再进行二次筛选的对象。
+
+##### 2.7.2 属性操作
+
+可以完全按照 jQuery 的语法来进行 PyQuery 的操作.
+
+```python
+p = pq('<p id="hello" class="hello"></p>')('p')
+print(p.attr("id"))
+print(p.attr("id", "plop"))
+print(p.attr("id", "hello"))
+
+print(p.addClass('beauty'))
+print(p.removeClass('hello'))
+print(p.css('font-size', '16px'))
+print(p.css({'background-color': 'yellow'}))
+```
+
+这是一连串的操作，而 p 是一直在原来的结果上变化的。因此执行上述操作之后，p 本身也发生了变化。
+
+##### 2.7.3 DOM操作
+
+```python
+p = pq('<p id="hello" class="hello"></p>')('p')
+print(p.append(' check out <a href="http://reddit.com/r/python"><span>reddit</span></a>'))
+print(p.prepend('Oh yes!'))
+d = pq('<div class="wrap"><div id="test"><a href="http://cuiqingcai.com">Germy</a></div></div>')
+p.prependTo(d('#test'))
+print(p)
+print(d)
+d.empty()
+print(d)
+```
+
+##### 2.7.4 遍历
+
+遍历用到 items 方法返回对象列表，或者用 lambda。
+
+```python
+doc = pq(filename='hello.html')
+lis = doc('li')
+for li in lis.items():
+    print(li.html())
+print(lis.each(lambda e: e))
+```
+
+
+
+其他更多用法参见官方文档。
+
+pyquery官方文档：https://pythonhosted.org/pyquery/
+
+
 
 #### 2.8 正则表达式
 
@@ -490,29 +693,297 @@ selenium-python文档：https://selenium-python.readthedocs.io/index.html
 
 #### 3.1 Scrapy框架的安装
 
+Scrapy是一个十分强大的爬虫框架，依赖的库比较多，至少需要依赖的库有Twisted 、lxml和pyOpenSSL。在不同的平台环境下，它所依赖的库也各不相同，所以在安装之前，最好确保把一些基本库安装好。
+
+通过pip安装：`pip install scrapy`
+
+如果出现如下错误：
+
+![1555641478347](img\scrapy_install_error.png)
+
+这是安装**Twisted导致的这个错误的发生的**，需要从**非官方版本**下载twisted并安装：
+
+https://www.lfd.uci.edu/~gohlke/pythonlibs/#twisted
+
+![1555641642742](img\scrapy_twisted_unofficial_link.png)
+
+下载对应版本后，通过pip安装：
+
+```shell
+pip install Twisted-19.2.0-cp36-cp36m-win_amd64.whl
+```
+
+![1555641801015](img\scrapy_twisted_install.png)
+
+**Twisted**是用Python实现的基于事件驱动的网络引擎框架，Twisted支持许多常见的传输及应用层协议，包括TCP、UDP、SSL/TLS、HTTP、IMAP、SSH、IRC以及FTP。scrapy是基于twisted实现的。
+
+成功安装twisted后，再通过`pip install scrap`即可成功安装scrapy。
+
+
+
 #### 3.2 Scrapy框架基本使用
 
-#### 3.3 Scrapy命令行详解
+第一步：创建项目
 
-#### 3.4 Scrapy中选择器的用法
+CMD进入需要放置项目的目录  输入：
 
-#### 3.5 Scrapy中Spiders的用法
+```shell
+scrapy startproject DoubanBook    # DoubanBook代表项目的名字
+```
+
+用pycharm打开可以看到如下目录结构：
+
+![1555642697741](img\scrapy_startproject.png)
+
+第二步：创建一个爬虫
+
+    cd DoubanBook
+    scrapy genspider doubanbook book.douban.com
+
+其中doubanbook是爬虫的名字，book.douban.com代表爬虫爬取url。
+
+执行成功后，可以看到spiders目录下新生成的文件：
+
+![1555643050711](img\scrapy_genspider.png)
+
+打开doubanbook.py文件，可以看到scrapy框架生成的基本爬虫模板，里面定义了爬虫的名称，爬取起始url，还有一个需要完善的解析方法。
+
+![1555643256677](img\scrapy_basic_model.png)
+
+第三步：实现爬虫
+
+先简单尝试一下把parse方法里的pass去掉，打印网页源码：
+
+```python
+def parse(self, response):
+    print(response.text)
+```
+
+第四步：运行爬虫
+
+通过下面命令运行爬虫：
+
+    scrapy crawl doubanbook     # doubanbook就是第二步创建爬虫时定义的爬虫名称
+
+这时会出现403错误
+
+![1555644310989](img\scrapy_crawl_error_403.png)
+
+这是因为豆瓣网站检测了请求是不是由浏览器发起的，不是的话会被拒绝访问，所以要让爬虫模拟浏览器请求。
+
+修改settings.py配置文件，配置请求头：
+
+```python
+# Override the default request headers:
+DEFAULT_REQUEST_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36 115Browser/6.0.3',
+}
+```
+
+再次运行爬虫，就能正常打印出网页源码。
+
+scrapy从创建项目到运行爬虫的基本流程就是这样，详细内容在后面具体介绍。
+
+
+
+#### 3.3 Scrapy基本原理
+
+scrapy架构如图所示：
+
+![scrapy_architecture](img\scrapy_architecture.png)
+
+- **Scrapy Engine**: scrapy引擎，负责Spiders、ItemPipeline、Downloader、Scheduler中间的通讯，信号、数据传递等等。
+
+- **Scheduler(调度器)**: 它负责接受引擎发送过来的requests请求，并按照一定的方式进行整理排列、入队，等待Scrapy Engine(引擎)来请求时，交给引擎。
+
+- **Downloader（下载器）**：负责下载Scrapy Engine(引擎)发送的所有Requests请求，并将其获取到的Responses交还给Scrapy Engine(引擎)，由引擎交给Spiders来处理，
+
+- **Spiders**：它负责处理所有Responses,从中分析提取数据，获取Item字段需要的数据，并将需要跟进的URL提交给引擎，再次进入Scheduler(调度器)，
+
+- **Item Pipeline**：它负责处理Spiders中获取到的Item，并进行处理，比如去重，持久化存储（存数据库，写入文件，总之就是保存数据用的）
+
+- **Downloader Middlewares（下载中间件）**：可以当作是一个可以自定义扩展下载功能的组件。
+
+- **Spider Middlewares（Spider中间件）**：可以理解为是一个可以自定扩展和操作引擎和Spiders中间‘通信‘的功能组件（比如进入Spiders的Responses;和从Spiders出去的Requests）
+
+
+
+根据scrapy框架的架构，建立一个项目之后：
+
+**第一件事情**是在items.py文件中定义一些字段，这些字段用来临时存储你需要保存的数据。方便后面保存数据到其他地方，比如数据库 或者 本地文本之类的。
+
+**第二件事情**在spiders文件夹中编写自己的爬虫。
+
+**第三件事情**在pipelines.py中存储自己的数据。
+
+**第四件事情**，不是非做不可的，settings.py文件 并不是一定要编辑的，只有有需要的时候才会编辑。SpiderMiddleware和DownloaderMiddleware也是在有需要的情况下进行修改。
+
+
+
+#### 3.4 Scrapy中items的用法
+
+在items中定义爬取内容，如下所示：
+
+```python
+import scrapy
+
+class DoubanbookTagItem(scrapy.Item):
+    # define the fields for your item here like:
+    # name = scrapy.Field()
+    tag_name = scrapy.Field()
+    tag_count = scrapy.Field()
+    tag_link = scrapy.Field()
+```
+
+
+
+#### 3.5 Scrapy中spiders的用法
+
+spider中通过解析请求的页面，最后构造一个item并返回。解析可以使用xpath进行解析，也可以使用Beautiful Soup等第三方库解析。
+
+```python
+import scrapy
+from scrapy import Request
+from DoubanBook.items import DoubanbookTagItem
+
+class DoubanbookSpider(scrapy.Spider):
+    name = 'doubanbook'
+    allowed_domains = ['book.douban.com']
+    start_urls = ['http://book.douban.com']
+
+    def parse(self, response):
+        # 获得所有热门标签链接
+        link_more = response.xpath('//div[@class="aside"]//span[@class="link-more"]//a/@href').extract_first()
+        link_more = self.start_urls[0] + link_more
+        # 请求热门标签链接，通过parse_tag方法解析
+        return Request(link_more, self.parse_tag)
+
+    # 解析豆瓣图书标签
+    def parse_tag(self, response):
+        # getall()获取所有标签链接，返回一个列表
+        lst_tag_link = response.xpath('//table[@class="tagCol"]//td//a//@href').getall()
+        lst_tag_count = response.xpath('//table[@class="tagCol"]//td//b//text()').getall()
+        for tag_link, tag_count in zip(lst_tag_link, lst_tag_count):
+            # 标签名称
+            tag_name = tag_link.split('/')[-1]
+            tag_link = self.start_urls[0] + tag_link
+            # 返回item
+            item = DoubanbookTagItem()
+            item['tag_name'] = tag_name
+            item['tag_count'] = tag_count
+            item['tag_link'] = tag_link
+            yield item
+```
+
+
 
 #### 3.6 Scrapy中Item Pipeline的用法
 
-#### 3.7 Scrapy中Download Middleware的用法
+页面解析后得到item之后，通过item pipeline进行后处理，一般是存入数据库或写入文件。
+
+把数据存入数据库，需要使用到pymysql、pymongo等操作数据库的第三方库,通过pip安装：
+
+	pip install pymysql
+	pip install pymongo
+
+下面通过MySQL演示具体使用：
+
+```python
+import pymysql
+from DoubanBook.items import DoubanbookTagItem
+
+
+class DoubanbookPipeline(object):
+    # 数据库链接配置
+    host = '127.0.0.1'
+    port = 3306
+    user = 'root'
+    psd = '123456'
+    db = 'spiders'
+    tb = 'doubanbook'
+
+    # 处理item
+    def process_item(self, item, spider):
+        # 判断具体的item，当有多个item的时候好区分
+        if isinstance(item, DoubanbookTagItem):
+            # 链接数据库
+            con = pymysql.connect(host=self.host, user=self.user, passwd=self.psd, db=self.db,
+                                  charset=self.c, port=self.port)
+            cue = con.cursor()
+            # 尝试插入数据库，捕获异常
+            try:
+                cue.execute("insert ignore into " + self.tb +
+                            " (tag_name, tag_count, tag_link) "
+                            "values (%s,%s,%s)",
+                            [item['tag_name'], item['tag_count'], item['tag_link']])
+            except Exception as e:
+                print('Insert error:', e)
+                con.rollback()
+            else:
+                # 提交事务
+                con.commit()
+            # 关闭数据库链接
+            con.close()
+            return item
+```
+
+
+
+#### 3.7 Scrapy中Middlewares的用法
+
+暂略。
 
 
 
 ### 4.使用scrapy-redis实现分布式爬虫
 
-#### 4.1 scrapy-redis的安装
+Scrapy 是一个通用的爬虫框架，但是不支持分布式，Scrapy-redis是为了更方便地实现Scrapy分布式爬取，而提供了一些以redis为基础的组件。
+
+#### 4.1 scrapy-redis安装
+
+需要安装reids和scrapy_redis库。
+
+```
+pip install redis
+pip install scrapy_redis
+```
+
+
 
 #### 4.2 scrapy-redis基本原理
+
+![è¿éåå¾çæè¿°](img\scrapy_redis_architecture.png)
+
+Scrapy-Redis分布式策略：
+
+- `Master端`(核心服务器) ：搭建一个Redis数据库，负责**url指纹判重、Request的分配，以及数据的存储**
+- `Slaver端`(爬虫程序执行端) ：负责执行爬虫程序，运行过程中提交新的Request给Master
+
+
+
+1. Scrapy-Reids 就是将Scrapy原本在内存中处理的 调度(就是一个队列Queue)、去重这两个操作通过Redis来实现。
+2. 多个Scrapy在采集同一个站点时会使用相同的redis key（可以理解为队列）添加Request 获取Request 去重Request，这样所有的spider不会进行重复采集。
+3. Redis是原子性的，一个Request要么被处理 要么没被处理，不存在第三可能。
+
+
+
+#### 4.3 scrapy-redis实例
+
+
 
 
 
 ### 5.反爬措施
+
+代码还没敲完就被封的豆瓣。
+
+![1555655250581](img\anti_climb_error_403.png)
+
+![1555659831004](img\anti_climb_error_403_2.png)
+
+
+
+
 
 #### 5.1 代理ip的使用
 
@@ -528,19 +999,160 @@ selenium-python文档：https://selenium-python.readthedocs.io/index.html
 
 #### 1.1 模拟器安装
 
+借助模拟器可以方便的进行调试开发APP，下载安装即可。
+
+夜神模拟器：https://www.yeshen.com/
+
+网易MuMu模拟器：http://mumu.163.com/
+
+
+
 #### 1.2 SDK安装
+
+下载地址：
+
+（1）官网下载(需翻墙)：https://developer.android.com/studio/index.html 
+
+（2）无需翻墙下载：http://www.androiddevtools.cn/
+
+![1555665777042](img\sdk_download.png)
+
+运行安装，得到如下目录：
+
+![1555665932626](D:\ProjectPython\SpiderSSS\文档\img\sdk_install_1.png)
+
+打开SDK Manager.exe
+
+**配置国内的镜像服务器地址**
+
+Android SDK Manager的主界面如下，从中可以看到许多的下载项，而该Android SDK Manager默认的下载项地址指向的是安卓官网的下载地址，在这种情况下，我们下载会出现及其卡顿的情况，甚至无法加载资源！所以说我们一般将其改成国内的下载源地址，修改方法如下，点击图示中的【Tools】，在弹出的下拉选项中选择【Options】
+
+![è¿éåå¾çæè¿°](img\sdk_manager_tools.png)
+
+    上海GDG镜像服务器
+    sdk.gdgshanghai.com   端口：8000 
+    大连东软信息学院镜像服务器地址
+    IPV4/IPV6：http://mirrors.neusoft.edu.cn  端口：80
+
+在配置好镜像服务器地址之后，再勾选图示中的“Force …”选项，然后点击【close】
+
+![1555667024129](img\sdk_proxy.png)
+
+**选择要安装的工具**
+
+并不是每一个软件都需要下载，而是有选择的，默认的情况下，该Android SDK Manager会包含以下三个下载项：
+
+    Android SDK Tools
+    Android SDK Platform-tools
+    Android SDK Build-tools
+
+其中Build-tools是安卓SDK的构建工具，最少我们应该选择一个，其中该软件默认选择的是最新版的，当然我们在这里也可以同时选择多个。
+
+![1555667482854](img\sdk_tools_select.png)
+
+然后选择一个Android版本下载，而在选择所要下载的Android版本时，推荐选择下载与Build-tools对应的版本。
+
+比如：
+
+![1555667719297](img\sdk_android_one.png)
+
+然后勾选Extras中的选项：
+
+![1555667745394](img\sdk_extras.png)
+
+勾选完之后，直接点击【Install】选项安装。
+
+注意：安装时间较长，可能持续数小时。
+
+
+
+**配置环境变量**
+
+ANDROID_HOME：配置sdk安装目录
+
+![1555666300592](img\sdk_ANDROID_HOME.png)
+
+把%ANDROID_SDK_HOME%\platform-tools;%ANDROID_SDK_HOME%\tools添加到Path环境变量中。
+
+
+
+![1555666392840](D:\ProjectPython\SpiderSSS\文档\img\sdk_path.png)
+
+**检测是否安装成功**
+
+cmd中输入adb：
+
+![1555666516559](D:\ProjectPython\SpiderSSS\文档\img\adk_adb_ok.png)
+
+
 
 #### 1.3 Fiddler安装
 
+Fiddler是一个http协议调试代理工具，它能够记录并检查所有你的电脑和互联网之间的http通讯，设置断点，查看所有的“进出”Fiddler的数据。 Fiddler 要比其他的网络调试器要更加简单，因为它不仅仅暴露http通讯还提供了一个用户友好的格式。
+
+直接从官网下载安装：https://www.telerik.com/download/fiddler
+
+
+
 #### 1.4 Appium安装
 
-#### 1.5 mitmproxy安装
+appium 是一个自动化测试开源工具，支持 iOS 平台和 Android 平台上的原生应用，web应用和混合应用。
+
+appium类库封装了标准Selenium客户端类库，为用户提供所有常见的JSON格式selenium命令以及额外的移动设备控制相关的命令，如多点触控手势和屏幕朝向。
+
+appium是跨平台的，可以用在OSX，Windows以及Linux桌面系统上运行。
+
+appium选择了Client/Server的设计模式。只要client能够发送http请求给server，那么的话client用什么语言来实现都是可以的，这就是appium及Selenium(WebDriver)如何做到支持多语言的原因。
+
+
+
+直接从官网下载安装：http://appium.io/
+
+
+
+#### 1.5 mitmproxy库的安装
+
+mitmproxy是一个支持HTTP和HTTPS的抓包程序，类似Fiddler、Charles的功能，只不过它通过控制台的形式操作。
+
+此外，mitmproxy还有两个关联组件，一个是mitmdump，它是mitmproxy的命令行接口，利用它可以对接Python脚本，实现监听后的处理；另一个是mitmweb，它是一个Web程序，通过它以清楚地观察到mitmproxy捕获的请求。
+
+
+
+安装：
+
+	pip install mitmproxy
+
+通过pip方式可能会报错，建议通过下载whl文件方式进行安装。
+
+下载地址：https://pypi.org/project/mitmproxy/#files
+
+	pip install mitmproxy-4.0.4-py3-none-any.whl
+
+
+
+**证书配置**
+
+对于mitmproxy来说，如果想要截获HTTPS请求，就需要设置证书。mitmproxy在安装后会提供一套CA证书，只要客户端信任了mitmproxy提供的证书，就可以通过mitmproxy获取HTTPS请求的具体内容，否则mitmproxy是无法解析HTTPS请求的。
+
+首先，运行以下命令产生CA证书，并启动mitmdump。
+
+接下来，我们就可以在用户目录下的.mitmproxy目录里面找到CA证书
+
+![1555668580113](img\mitmproxy_ca.png)
+
+
+
+
+
+
 
 
 
 ### 2.抓包工具的使用
 
 #### 2.1 Fiddler配置
+
+
 
 #### 2.2 模拟器代理配置
 
@@ -576,12 +1188,23 @@ selenium-python文档：https://selenium-python.readthedocs.io/index.html
 
 ## References
 
-崔庆才：https://cuiqingcai.com/
+崔庆才的个人博客：https://cuiqingcai.com/
 
-廖雪峰：https://www.liaoxuefeng.com
+廖雪峰的官方网站：https://www.liaoxuefeng.com
 
 Urllib模块的使用：https://www.cnblogs.com/Lands-ljk/p/5447127.html
 
 Requests官方文档：http://docs.python-requests.org/zh_CN/latest/
 
 Xpath教程：http://www.w3school.com.cn/xpath/index.asp
+
+selenium官网：https://www.seleniumhq.org/docs/index.jsp
+
+selenium-python文档：https://selenium-python.readthedocs.io/index.html
+
+pyquery官网：https://pythonhosted.org/pyquery/
+
+使用 scrapy-redis实现分布式爬虫：https://blog.csdn.net/lm_is_dc/article/details/81057811
+
+SDK的下载与安装：https://blog.csdn.net/zzy1078689276/article/details/80380118
+
