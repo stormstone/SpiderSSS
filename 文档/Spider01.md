@@ -29,6 +29,8 @@ Anaconda下载地址：https://repo.anaconda.com/archive/ ，找到对应系统�
 
 参考安装教程：https://blog.csdn.net/ITLearnHall/article/details/81708148
 
+
+
 #### 1.2 Selenium安装
 
 Selenium是一个浏览器自动化测试框架，Selenium测试直接运行在浏览器中，就像真正的用户在操作一样。框架底层使用JavaScript模拟真实用户对浏览器进行操作。对于爬虫来说，有些页面是通过Ajax动态获取数据的，所以可以通过selenium加载动态页面，以便获取页面数据。
@@ -38,6 +40,8 @@ Selenium是一个浏览器自动化测试框架，Selenium测试直接运行在�
 chromedriver下载地址（主要浏览器版本）：http://npm.taobao.org/mirrors/chromedriver/
 
 下载完成后需要将chromedriver.exe配置到环境变量，可以直接将chromedriver.exe放到anaconda安装目录，因为anaconda环境变量如果是配置好的，把chromedriver.exe放在路径下便能找到。
+
+
 
 #### 1.3 python相关包
 
@@ -51,9 +55,13 @@ js渲染：selenium（chromedriver），phantomjs（命令行JavaScript）
 
 web：flask，django
 
+
+
 #### 1.4 数据库安装MySQL、MongoDB、Redis
 
-略
+略。
+
+
 
 #### 1.5注意
 
@@ -77,6 +85,8 @@ pip版本如果不是最新，通过pip升级pip出错，则通过下载pip源�
 > ③第三部分是主机资源的具体地址，如目录和文件名等。
 
 爬虫爬取数据时必须要有一个目标的URL才可以获取数据，因此，它是爬虫获取数据的基本依据，准确理解它的含义对爬虫学习有很大帮助。
+
+
 
 #### 2.2 Urllib库基本使用
 
@@ -983,8 +993,6 @@ Scrapy-Redis分布式策略：
 
 
 
-
-
 #### 5.1 代理ip的使用
 
 #### 5.2 cookies池的使用
@@ -1376,6 +1384,8 @@ mitmdump是mitmproxy的命令行接口，同时还可以对接Python对请求进
 
 appium实现模拟滑动，不断的加载数据，可以通过fiddler分析的请求地址用mitmdump拦截，获取数据。
 
+如下示例，拦截数据请求返回的response数据，保存到MySQL数据库。
+
 ```python
 import json
 import pymysql
@@ -1392,6 +1402,7 @@ TABLE_NAME = 'table'
 def response(flow):
     # 根据fiddler抓包分析到的数据请求，进行数据处理
     if 'papi.mama.cn/api/search/searchAll' in flow.request.url:
+        # 解析返回的json数据
         if 'list' in json.loads(flow.response.text)['data']:
             for item in json.loads(flow.response.text)['data']['list']:
                 print(item['pj_title'])
@@ -1418,7 +1429,11 @@ def process_item(item):
     con.close()
 ```
 
+然后通过如下命令运行，其中py_name是python文件名称，8888是检测端口号，要和模拟器配置的代理的端口号一致。
 
+	mitmdump -s py_name.py -p 8888
+
+![1556101658649](./img/mitmproxy_mitmdump_run.png)
 
 
 
@@ -1462,6 +1477,8 @@ jad -o -8 -r -d[PATH_OUT] -sjava [PATH_CLASS]
 
 
 
+
+
 ## References
 
 崔庆才的个人博客：https://cuiqingcai.com/
@@ -1487,3 +1504,4 @@ SDK的下载与安装：https://blog.csdn.net/zzy1078689276/article/details/8038
 Fiddler工具使用介绍：https://www.cnblogs.com/miantest/p/7289694.html
 
 App爬虫神器mitmproxy和mitmdump的使用：https://www.jianshu.com/p/b0612fcedfa1
+
