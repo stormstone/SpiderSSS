@@ -1019,7 +1019,7 @@ Scrapy-Redis分布式策略：
 
 运行安装，得到如下目录：
 
-![1555665932626](D:\ProjectPython\SpiderSSS\文档\img\sdk_install_1.png)
+![1555665932626](./img/sdk_install_1.png)
 
 打开SDK Manager.exe
 
@@ -1196,11 +1196,11 @@ mitmproxy-ca-cert.pem是用于手机端的安装，具体步骤后面介绍。
 
 然后长按WiredSSID这个选项，再点击修改网络。 
 
-![1556071258505](D:\ProjectPython\SpiderSSS\文档\img\moniqi_change_net.png)
+![1556071258505](./img/moniqi_change_net.png)
 
 勾选显示高级选项，代理选择手动，输入代理ip，即本机ip，端口修改为fiddler设置的端口，然后保存，这样模拟器的数据请求就能被fiddler检测了。
 
-![1556071368862](D:\ProjectPython\SpiderSSS\文档\img\moniqi_proxy.png)
+![1556071368862](./img/moniqi_proxy.png)
 
 ##### 2.2.2 证书安装
 
@@ -1366,7 +1366,7 @@ mitmdump是mitmproxy的命令行接口，同时还可以对接Python对请求进
 
 输入证书名称比如mitmproxy点击确定完成安装。
 
-![1556099499345](D:\ProjectPython\SpiderSSS\文档\img\mitmproxy_ca_name.png)
+![1556099499345](./img/mitmproxy_ca_name.png)
 
 
 
