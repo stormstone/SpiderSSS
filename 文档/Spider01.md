@@ -1076,13 +1076,13 @@ ANDROID_HOME：配置sdk安装目录
 
 
 
-![1555666392840](D:\ProjectPython\SpiderSSS\文档\img\sdk_path.png)
+![1555666392840](./img/sdk_path.png)
 
 **检测是否安装成功**
 
 cmd中输入adb：
 
-![1555666516559](D:\ProjectPython\SpiderSSS\文档\img\adk_adb_ok.png)
+![1555666516559](./img/adk_adb_ok.png)
 
 
 
@@ -1152,13 +1152,63 @@ mitmproxy-ca-cert.pem是用于手机端的安装，具体步骤后面介绍。
 
 ### 2.抓包工具的使用
 
+**Fiddler基础知识**
+
+- Fiddler是强大的抓包工具，它的原理是以web代理服务器的形式进行工作的，使用的代理地址是：127.0.0.1，端口默认为8888，我们也可以通过设置进行修改。
+- 代理就是在客户端和服务器之间设置一道关卡，客户端先将请求数据发送出去后，代理服务器会将数据包进行拦截，代理服务器再冒充客户端发送数据到服务器；同理，服务器将响应数据返回，代理服务器也会将数据拦截，再返回给客户端。
+- Fiddler可以抓取支持http代理的任意程序的数据包，如果要抓取https会话，要先安装证书。
+
 #### 2.1 Fiddler配置
 
+要使用Fiddler进行抓包，首先需要确保Capture Traffic是开启的（安装后是默认开启的），勾选File->Capture Traffic，也可以直接点击Fiddler界面左下角的图标开启和关闭抓包。开启之后用浏览器访问网页，fiddler中就应该看到抓取到的包了。
+
+![1555991641947](./img/fiddler_capture_traffic.png)
+
+**HTTPS的配置：**
+
+点击Tools然后点击Options
+
+![1555996969658](./img/fiddler_options.png)
+
+点击HTTPS打开https traffic，可以选择监听范围。
+
+![1555997540261](./img/fiddler_https.png)
+
+点击Connections可以看到监听的端口号，勾选Allow remote computers connect选项。
+
+![1555997594713](./img/fiddler_connections.png)
+
+这样https监听就配置成功了，fiddler可以监听http和https请求。
+
+每个Fiddler抓取到的数据包都会在该列表中展示，点击具体的一条数据包可以在右侧菜单点击Insepector查看详细内容。主要分为请求（即客户端发出的数据）和响应（服务器返回的数据）两部分。
+
+![1555999088942](./img/fiddler_inspectors.png)
 
 
-#### 2.2 模拟器代理配置
 
-#### 2.3 抓包分析
+#### 2.2 模拟器配置
+
+##### 2.2.1 代理配置
+
+打开模拟器，进入设置，点击WLAN后进入如下界面。
+
+![1556071108064](./img/moniqi_wlan.png)
+
+然后长按WiredSSID这个选项，再点击修改网络。 
+
+![1556071258505](D:\ProjectPython\SpiderSSS\文档\img\moniqi_change_net.png)
+
+勾选显示高级选项，代理选择手动，输入代理ip，即本机ip，端口修改为fiddler设置的端口，然后保存，这样模拟器的数据请求就能被fiddler检测了。
+
+![1556071368862](D:\ProjectPython\SpiderSSS\文档\img\moniqi_proxy.png)
+
+##### 2.2.2 证书安装
+
+打开模拟器里的浏览器，输入配置的ip加端口，出现如下界面，点击FiddlerRoot certificate进行证书安装。证书名字随便输入，比如fiddler，然后点击确定，证书就安装好了。
+
+![1556071632114](./img/moniqi_browser_ca.png)
+
+![1556071775472](./img/moniqi_ca_name.png)
 
 
 
@@ -1166,23 +1216,247 @@ mitmproxy-ca-cert.pem是用于手机端的安装，具体步骤后面介绍。
 
 #### 3.1 APK包名获取
 
+通过adb方式来获取apk包名。首先确保adb服务已经启动并且连接上了模拟器。
+
+启动adb服务：
+
+	adb start-server
+
+通过adb devices方式查看连接上的模拟器。如果输入adb devices没有已连接的设备，则需要通过手动连接。
+
+	adb connect 127.0.0.1:62001
+
+##### 端口号查看
+
+打开任务管理器详细信息，找到模拟器的PID，如下图是夜神模拟器的运行PID。
+
+![1556094297742](./img/adb_task_manager_pid.png)
+
+然后通过`netstat -ano`命令找到对应端口。夜神模拟器的默认端口从62001开始，后面都是从62025开始
+
+![1556094407567](./img/abd_device_find_port.png)
+
+确认adb连接上设备之后，输入
+
+    adb shell
+命令启动adb shell，然后输入如下命令：
+
+	logcat | grep cmp=
+
+然后在模拟器中打开想要获取包名的app,就可以看到app的包名和页面的Activity了。
+
+![1556094871781](./img/adb_find_activity.png)
+
+
+
 #### 3.2 Appium使用
 
+appium的python包通过如下命令安装：
+
+	pip install Appium-Python-Client 
+
+启动appium的服务
+
+![1556097084901](./img/appium_start.png)
+
+操作示例代码：
+
+```python
+import time
+from appium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+
+# 连接配置
+cap = {
+    "platformName": "Android",
+    "platformVersion": "4.4.2",
+    "deviceName": "127.0.0.1:62026",
+    "appPackage": "cn.mama.pregnant",
+    "appActivity": "cn.mama.pregnant.activity.HomeActivity",
+    "noReset": True,
+    "resetKeyboard": True,
+    "unicodeKeyboard": True  # 中文支持！！！
+}
 
 
-### 4.利用Appium和mitmproxy抓取存储数据
+# 获取屏幕大小
+def get_size():
+    x = driver.get_window_size()['width']
+    y = driver.get_window_size()['height']
+    return (x, y)
+
+
+KEY_WORD = '纸尿裤'
+print('APP启动中...')
+# 启动连接
+driver = webdriver.Remote("http://localhost:4723/wd/hub", cap)
+
+l = get_size()
+x1 = int(l[0] * 0.6)
+y1 = int(l[1] * 0.9)
+y2 = int(l[1] * 0.3)
+
+# XPATH
+XPATH_SEARCH = "//android.widget.TextView[@resource-id='cn.mama.pregnant:id/text_search_actionBar']"
+WebDriverWait(driver, 10).until(lambda x: x.find_element_by_xpath(XPATH_SEARCH))  # 等待10s页面加载完成
+driver.find_element_by_xpath(XPATH_SEARCH).click()  # 点击
+XPATH_SEARCH_IN = "//android.widget.EditText[@resource-id='cn.mama.pregnant:id/input']"
+WebDriverWait(driver, 2).until(lambda x: x.find_element_by_xpath(XPATH_SEARCH_IN))
+driver.find_element_by_xpath(XPATH_SEARCH_IN).send_keys(KEY_WORD)  # 输入文字
+time.sleep(1)
+# enter搜索
+driver.keyevent(66)
+
+time.sleep(10)
+while True:
+    driver.swipe(x1, y1, x1, y2)  # 滑动屏幕
+    print('滑动屏幕...')
+    time.sleep(1)
+```
+
+其中Xpath的获取通过sdk的uiautomatorviewer工具获取。
+
+##### uiautomatorviewer的使用
+
+![1556097553933](./img/uiautomatorviewer_file.png)
+
+双击即可运行，点击左上角按钮即可获取模拟器页面，点击页面相应组件就可在右边获取到相应的xpath路径。
+
+![1556097647560](./img/uiautomatorviewer_view.png)
+
+uiautomatorviewer优化包替换：
+
+##### TODO
+
+
+
+注意：appium服务在开启状态下uiautomatorviewer无法获取模拟器界面！
+
+
+
+### 4.利用mitmproxy抓取存储数据
 
 #### 4.1 基本原理
 
+mitmproxy还有两个关联组件。一个是mitmdump，它是mitmproxy的命令行接口，利用它我们可以对接Python脚本，用Python实现监听后的处理。另一个是mitmweb，它是一个Web程序，通过它我们可以清楚观察mitmproxy捕获的请求。
+
+手机和PC在同一个局域网内，设置代理为mitmproxy的代理地址，这样手机在访问互联网的时候流量数据包就会流经mitmproxy，mitmproxy再去转发这些数据包到真实的服务器，服务器返回数据包时再由mitmproxy转发回手机，这样mitmproxy就相当于起了中间人的作用，抓取到所有Request和Response，另外这个过程还可以对接mitmdump，抓取到的Request和Response的具体内容都可以直接用Python来处理，比如得到Response之后我们可以直接进行解析，然后存入数据库，这样就完成了数据的解析和存储过程。
+
+由于windows不支持mitmproxy，所以使用mitmdump来处理数据。
+
+mitmdump是mitmproxy的命令行接口，同时还可以对接Python对请求进行处理，这是相比Fiddler、Charles等工具更加方便的地方。有了它我们可以不用手动截获和分析HTTP请求和响应，只需写好请求和响应的处理逻辑即可。它还可以实现数据的解析、存储等工作，这些过程都可以通过Python实现。
+
+
+
+**证书安装：**
+
+对于https，在前面讲了windows端证书的安装，模拟器也同样需要安装证书。
+
+将mitmproxy-ca-cert.pem文件传到模拟器的sdcard：
+
+![1556098985475](./img/mitmproxy_ca_adb_push.png)
+
+然后打开模拟器设置，点击安全选项，再点击从SD卡安装选项进行安装。
+
+![1556099337529](./img/mitmproxy_ca_safe.png)
+
+找到push到sdcard的mitmproxy-ca-cert.cer文件，点击。
+
+![1556099410222](./img/mitmproxy_ca_sdcard.png)
+
+输入证书名称比如mitmproxy点击确定完成安装。
+
+![1556099499345](D:\ProjectPython\SpiderSSS\文档\img\mitmproxy_ca_name.png)
+
+
+
+
+
 #### 4.2 抓取步骤
+
+appium实现模拟滑动，不断的加载数据，可以通过fiddler分析的请求地址用mitmdump拦截，获取数据。
+
+```python
+import json
+import pymysql
+
+host = '127.0.0.1'
+user = 'root'
+psd = '123456'
+db = 'db'
+c = 'utf8'
+port = 3306
+TABLE_NAME = 'table'
+
+
+def response(flow):
+    # 根据fiddler抓包分析到的数据请求，进行数据处理
+    if 'papi.mama.cn/api/search/searchAll' in flow.request.url:
+        if 'list' in json.loads(flow.response.text)['data']:
+            for item in json.loads(flow.response.text)['data']['list']:
+                print(item['pj_title'])
+                process_item(item)
+
+
+# 把数据保存到数据库
+def process_item(item):
+    con = pymysql.connect(host=host, user=user, passwd=psd, db=db, charset=c, port=port)
+    cue = con.cursor()
+    try:
+        cue.execute("insert ignore into " +
+                    TABLE_NAME +
+                    "(author, answers, pj_url, authorid, answer_authorid_itt, pj_name, pj_id, pj_title, pj_description) "
+                    "values (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                    [item['author'], item['answers'], item['pj_url'], item['authorid'],
+                     item['answer_authorid_itt'], item['pj_name'], item['pj_id'],
+                     item['pj_title'], item['pj_description']])
+    except Exception as e:
+        print('Insert error:', e)
+        con.rollback()
+    else:
+        con.commit()
+    con.close()
+```
+
+
+
+
 
 
 
 ### 5.APK脱壳反编译
 
-#### 5.1 APK脱壳
+#### 5.1 脱壳：
 
-#### 5.2 APK反编译
+https://www.jianshu.com/p/138c9de2c987
+
+工具：VirtualXposed（或者直接xposed）、FDex2
+
+#### 5.2 APK反编译：
+
+https://blog.csdn.net/s13383754499/article/details/78914592
+
+- apktool ：使用apktool反编译apk得到图片、XML配置、语言资源等文件，
+
+```shell
+java -jar apktool_2.0.1.jar d -f [PATH_APK] -o [PATH_OUT]
+```
+
+- dex2jar：使用dex2jar反编译apk得到Java源代码，将要反编译的APK后缀名改为.rar或者 .zip，并解压，得到其中的classes.dex文件（它就是java文件编译再通过dx工具打包而成的）
+
+```shell
+d2j-dex2jar classes.dex
+```
+
+- jd-gui ：源码查看，IDEA亦可
+
+#### 5.3 JAD-反编译class文件：
+
+[利用jdk自带的jad.exe实现批量反编译class文件](https://www.cnblogs.com/flydkPocketMagic/p/7048350.html)
+
+```shell
+jad -o -8 -r -d[PATH_OUT] -sjava [PATH_CLASS]
+```
 
 
 
@@ -1210,3 +1484,6 @@ pyquery官网：https://pythonhosted.org/pyquery/
 
 SDK的下载与安装：https://blog.csdn.net/zzy1078689276/article/details/80380118
 
+Fiddler工具使用介绍：https://www.cnblogs.com/miantest/p/7289694.html
+
+App爬虫神器mitmproxy和mitmdump的使用：https://www.jianshu.com/p/b0612fcedfa1
