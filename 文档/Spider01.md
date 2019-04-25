@@ -1861,30 +1861,17 @@ jad -o -8 -r -d[PATH_OUT] -sjava [PATH_CLASS]
 
 ## References
 
-崔庆才的个人博客：https://cuiqingcai.com/
-
-廖雪峰的官方网站：https://www.liaoxuefeng.com
-
-Urllib模块的使用：https://www.cnblogs.com/Lands-ljk/p/5447127.html
-
-Requests官方文档：http://docs.python-requests.org/zh_CN/latest/
-
-Xpath教程：http://www.w3school.com.cn/xpath/index.asp
-
-selenium官网：https://www.seleniumhq.org/docs/index.jsp
-
-selenium-python文档：https://selenium-python.readthedocs.io/index.html
-
-pyquery官网：https://pythonhosted.org/pyquery/
-
-使用 scrapy-redis实现分布式爬虫：https://blog.csdn.net/lm_is_dc/article/details/81057811
-
-SDK的下载与安装：https://blog.csdn.net/zzy1078689276/article/details/80380118
-
-Fiddler工具使用介绍：https://www.cnblogs.com/miantest/p/7289694.html
-
-App爬虫神器mitmproxy和mitmdump的使用：https://www.jianshu.com/p/b0612fcedfa1
-
-APK反编译：https://blog.csdn.net/s13383754499/article/details/78914592
-
-利用jdk自带的jad.exe实现批量反编译class文件：https://www.cnblogs.com/flydkPocketMagic/p/7048350.html
+1. 崔庆才的个人博客：https://cuiqingcai.com/
+2. 廖雪峰的官方网站：https://www.liaoxuefeng.com
+3. Urllib模块的使用：https://www.cnblogs.com/Lands-ljk/p/5447127.html
+4. Requests官方文档：http://docs.python-requests.org/zh_CN/latest/
+5. Xpath教程：http://www.w3school.com.cn/xpath/index.asp
+6. selenium官网：https://www.seleniumhq.org/docs/index.jsp
+7. selenium-python文档：https://selenium-python.readthedocs.io/index.html
+8. pyquery官网：https://pythonhosted.org/pyquery/
+9. 使用 scrapy-redis实现分布式爬虫：https://blog.csdn.net/lm_is_dc/article/details/81057811
+10. SDK的下载与安装：https://blog.csdn.net/zzy1078689276/article/details/80380118
+11. Fiddler工具使用介绍：https://www.cnblogs.com/miantest/p/7289694.html
+12. App爬虫神器mitmproxy和mitmdump的使用：https://www.jianshu.com/p/b0612fcedfa1
+13. APK反编译：https://blog.csdn.net/s13383754499/article/details/78914592
+14. 利用jdk自带的jad实现批量反编译class文件：https://www.cnblogs.com/flydkPocketMagic/p/7048350.html
