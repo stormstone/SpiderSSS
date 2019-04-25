@@ -57,17 +57,13 @@ web：flask，django
 
 
 
-#### 1.4 数据库安装MySQL、MongoDB、Redis
-
-略。
-
-
-
-#### 1.5注意
+#### 1.4 注意
 
 pip版本如果不是最新，通过pip升级pip出错，则通过下载pip源码进行安装。下载地址：https://pypi.org/project/pip/#files
 
 解压后通过命令：`python setup.py install`进行安装。
+
+
 
 
 
@@ -693,10 +689,6 @@ pyquery官方文档：https://pythonhosted.org/pyquery/
 
 
 
-#### 2.8 正则表达式
-
-暂略。
-
 
 
 ### 3.scrapy框架的使用
@@ -937,11 +929,19 @@ class DoubanbookPipeline(object):
             return item
 ```
 
+然后取消settings中的ITEM_PIPELINES注释，数字代表优先级，当有多个item_pipelines的时候起作用。
+
+```python
+# Configure item pipelines
+# See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+ITEM_PIPELINES = {
+   'DoubanBook.pipelines.DoubanbookPipeline': 300,
+}
+```
+
+这样再执行`scrapy crawl doubanbook`启动爬虫，数据就会保存到数据库中。
 
 
-#### 3.7 Scrapy中Middlewares的用法
-
-暂略。
 
 
 
@@ -979,6 +979,298 @@ Scrapy-Redis分布式策略：
 
 #### 4.3 scrapy-redis实例
 
+##### 4.3.1 items.py
+
+定义两个item，一个是待爬取的每本书的url，一个是每本书的具体内容。
+
+```python
+# -*- coding: utf-8 -*-
+import scrapy
+from scrapy.loader.processors import MapCompose, TakeFirst, Join
+
+def remove_space(value):
+    return value.strip()
+
+# 要爬取的每本书的url
+class MasterRedisItem(scrapy.Item):
+    url = scrapy.Field()
+
+# 要爬取的每一本书的具体内容
+class DangdangItem(scrapy.Item):
+    collection = 'dangdang'
+
+    name = scrapy.Field()
+    author = scrapy.Field()
+    price = scrapy.Field(
+        input_processor=MapCompose(remove_space),
+    )
+    crawl_time = scrapy.Field()
+    ISBN = scrapy.Field()
+    id = scrapy.Field()
+```
+
+##### 4.3.2 spiders
+
+实现两个spider，一个用来获取每本书的url，存入redis，框架实现去重，爬取队列等。另一个用来爬取每本书的具体内容，从redis中读取url进行爬取。
+
+master端spider：返回MasterRedisItem
+
+```python
+import scrapy
+from scrapy import Selector, Request
+from urllib import parse
+from dangdang.items import MasterRedisItem
+
+class HouseSpider(scrapy.Spider):
+    name = 'dangmaster'
+    allowed_domains = ['category.dangdang.com', 'book.dangdang.com']
+    start_urls = ['http://book.dangdang.com/01.03.htm?ref=book-01-A']
+
+    def parse(self, response):
+        url_nodes = response.xpath("//div[@class='con flq_body']/div[@class='level_one ']/dl/dt/a/@href").extract()
+        for url_node in url_nodes:
+            yield Request(url=parse.urljoin(response.url, url_node), callback=self.parse_list)
+
+    def parse_list(self, response):
+        next_url = response.xpath("//li[@class='next']/a/@href").extract_first()
+
+        if next_url:
+            yield Request(url=parse.urljoin(response.url, next_url), callback=self.parse_list)
+
+        url_nodes = response.xpath("//div[@class='con shoplist']/div/ul/li/a/@href").extract()
+        for url_node in url_nodes:
+            item = MasterRedisItem()
+            item['url'] = url_node
+            yield item
+```
+
+client端spider：返回DangdangItem，其中redis_key = 'dangdang:start_urls'，和下面pipelines对应一致。
+
+```python
+# -*- coding: utf-8 -*-
+from scrapy.spiders import Rule
+from scrapy.linkextractors import LinkExtractor
+from scrapy_redis.spiders import RedisSpider, RedisCrawlSpider
+from dangdang.items import DangdangItem
+from datetime import datetime
+
+
+class Dangdangspider(RedisSpider):
+    """Spider that reads urls from redis queue (myspider:start_urls)."""
+    name = 'dangdang'
+    redis_key = 'dangdang:start_urls'
+    allowed_domains = ['book.dangdang.com', 'product.dangdang.com', 'www.dangdang.com']
+
+    def __init__(self, *args, **kwargs):
+        # Dynamically define the allowed domains list.
+        self.number = 0
+        super(Dangdangspider, self).__init__(*args, **kwargs)
+
+    def parse(self, response):
+        item = DangdangItem()
+        item["name"] = response.xpath("//h1/@title").extract_first()
+        item["author"] = response.xpath("//span[@id='author']/a[1]/text()").extract_first()
+        item["price"] = response.xpath("//p[@id='dd-price']/text()[2]").extract_first()
+        item["ISBN"] = response.xpath("//div[@id='detail_describe']/ul/li[5]/text()").extract_first()
+        item["crawl_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.number = self.number + 1
+        item["id"] = self.number
+        yield item
+```
+
+##### 4.3.3 pipelines.py
+
+处理url的redis缓存和最终数据保存到数据库。
+
+```python
+# -*- coding: utf-8 -*-
+import pymongo
+import pymysql
+from scrapy.conf import settings
+from dangdang.items import DangdangItem, MasterRedisItem
+import redis
+
+class DangdangPipeline(object):
+    def process_item(self, item, spider):
+        return item
+
+# 把数据存入mongodb
+class MongoPipeline(object):
+    def __init__(self, uri, dbname, sheetname):
+        client = pymongo.MongoClient(uri)
+        # 指定数据库
+        mydb = client[dbname]
+        # 存放数据的数据库表名
+        self.post = mydb[sheetname]
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            uri=crawler.settings.get('MONGO_URI'),
+            dbname=crawler.settings.get('DBNAME'),
+            sheetname=crawler.settings.get('SHEETNAME')
+        )
+
+    def process_item(self, item, spider):
+        if isinstance(item, DangdangItem):
+            data = dict(item)
+            self.post.insert(data)
+        return item
+
+# 实现redis对url的缓存作用
+class RedisLinJiaPipeline(object):
+    def __init__(self, host='localhost', port=6379,
+                 db=2, password=None):
+        self.host = host
+        self.port = port
+        self.db = db
+        self.password = password
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            host=crawler.settings.get('REDIS_HOST'),
+            port=crawler.settings.get('REDIS_PORT'),
+            db=crawler.settings.get('REDIS_DB'),
+            password=crawler.settings.get('REDIS_PASSWORD'),
+        )
+
+    def open_spider(self, spider):
+        self.r = redis.Redis(host=self.host, port=self.port, password=self.password, db=self.db)
+
+    def close_spider(self, spider):
+        pass
+
+    def process_item(self, item, spider):
+        if isinstance(item, MasterRedisItem):
+            self.r.lpush('dangdang:start_urls', item['url'])
+        return item
+```
+
+##### 4.3.4 middlewares.py
+
+```python
+# -*- coding: utf-8 -*-
+from scrapy import signals
+from fake_useragent import UserAgent
+
+class DangdangDownloaderMiddleware(object):
+    # Not all methods need to be defined. If a method is not defined,
+    # scrapy acts as if the downloader middleware does not modify the
+    # passed objects.
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        # This method is used by Scrapy to create your spiders.
+        s = cls()
+        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
+        return s
+
+    def process_request(self, request, spider):
+        # Called for each request that goes through the downloader
+        # middleware.
+
+        # Must either:
+        # - return None: continue processing this request
+        # - or return a Response object
+        # - or return a Request object
+        # - or raise IgnoreRequest: process_exception() methods of
+        #   installed downloader middleware will be called
+        return None
+
+    def process_response(self, request, response, spider):
+        # Called with the response returned from the downloader.
+
+        # Must either;
+        # - return a Response object
+        # - return a Request object
+        # - or raise IgnoreRequest
+        return response
+
+    def process_exception(self, request, exception, spider):
+        # Called when a download handler or a process_request()
+        # (from other downloader middleware) raises an exception.
+
+        # Must either:
+        # - return None: continue processing this exception
+        # - return a Response object: stops process_exception() chain
+        # - return a Request object: stops process_exception() chain
+        pass
+
+    def spider_opened(self, spider):
+        spider.logger.info('Spider opened: %s' % spider.name)
+
+# 生成随机的UserAgent
+class RandomUserAgentMiddleware(object):
+    def __init__(self, crawler):
+        super(RandomUserAgentMiddleware, self).__init__()
+        # self.user_agent_list = crawler.settings.get("user_agent_list",[])
+        self.ua = UserAgent()
+        self.ua_type = crawler.settings.get("RANDOM_UA_TYPE", "random")
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler)
+
+    def process_request(self, request, spider):
+        def get_ua():
+            return getattr(self.ua, self.ua_type)
+
+        random_agent = get_ua()
+        request.headers.setdefault("User-Agent", random_agent)
+```
+
+##### 4.3.5 settings.py
+
+```python
+# -*- coding: utf-8 -*-
+# Scrapy settings for dangdang project
+
+BOT_NAME = 'dangdang'
+SPIDER_MODULES = ['dangdang.spiders']
+NEWSPIDER_MODULE = 'dangdang.spiders'
+
+# Obey robots.txt rules
+ROBOTSTXT_OBEY = False
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+
+# Disable cookies (enabled by default)
+COOKIES_ENABLED = False
+
+# Enable or disable downloader middlewares
+# See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
+DOWNLOADER_MIDDLEWARES = {
+    'dangdang.middlewares.RandomUserAgentMiddleware': 100,
+    'dangdang.middlewares.DangdangDownloaderMiddleware': 200,
+}
+
+# Configure item pipelines
+# See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+ITEM_PIPELINES = {
+    'dangdang.pipelines.RedisLinJiaPipeline': 300,
+    'dangdang.pipelines.MongoPipeline': 200,
+}
+
+# mongodb数据库配置
+MONGO_URI = "mongodb://localhost/dangdang"
+DBNAME = "dangdang"
+SHEETNAME = "dangdang"
+# redis数据库配置
+REDIS_HOST = "127.0.0.1"
+REDIS_PORT = "6379"
+REDIS_PASSWORD = ""
+```
+
+
+
+运行master端开始获取url存入redis，client端可以开启多个同时进行爬取，这样就实现了spider的并行。
+
+```shell
+scrapy crawl dangmaster # 开启一个
+scrapy crawl dangdang # 可以开启多个
+```
+
 
 
 
@@ -995,7 +1287,27 @@ Scrapy-Redis分布式策略：
 
 #### 5.1 代理ip的使用
 
+许多网站也做了许多反爬措施，其中爬虫访问过于频繁直接封ip地址的方法被许多网站采用，代理ip便可以防止这种情况出现。
+
+scrapy框架在middlewares里设置代理ip。
+
+```python
+def process_request(self, request, spider):
+    ip = '调用随机获取一个IP的方法得到一个ip'
+    # request设置代理ip
+    request.meta['proxy'] = ip
+```
+
+
+
 #### 5.2 cookies池的使用
+
+有的网站不登录直接爬取会有一些弊端，弊端主要有以下两点。
+
+- 设置了登录限制的页面无法爬取。如某论坛设置了登录才可查看资源，某博客设置了登录才可查看全文等，这些页面都需要登录账号才可以查看和爬取。
+- 一些页面和接口虽然可以直接请求，但是请求一旦频繁，访问就容易被限制或者IP直接被封，但是登录之后就不会出现这样的问题，因此登录之后被反爬的可能性更低。
+
+所以可以搭建一个cookies池来模拟登录。
 
 
 
@@ -1332,13 +1644,11 @@ while True:
 
 ![1556097647560](./img/uiautomatorviewer_view.png)
 
-uiautomatorviewer优化包替换：
-
-##### TODO
-
 
 
 注意：appium服务在开启状态下uiautomatorviewer无法获取模拟器界面！
+
+
 
 
 
@@ -1441,39 +1751,109 @@ def process_item(item):
 
 ### 5.APK脱壳反编译
 
+有时候，通过抓包工具分析app里面数据的请求url，可以得到请求的参数，如果能模拟请求url并设置参数，就可直接获取数据。但是一般请求参数里都有sign等加密参数，无法获得，通过反编译apk得到源码，如果能找到sign的加密方式，就可以自己模拟进行sign参数的发送，得到数据。
+
 #### 5.1 脱壳：
 
-https://www.jianshu.com/p/138c9de2c987
+为了不让APK那么容易被破解，所以就出现了加固工具，让反编译的难度更大。但是有了加固技术，就会有反加固技术，正所谓道高一尺魔高一丈。
 
-工具：VirtualXposed（或者直接xposed）、FDex2
+如下图经过加固后的apk，通过常规方法反编译无法获取到源码。
+
+![img](./img/apk_decompile_jiagu_jar.png)
+
+##### 安装Xposed模块。
+
+下载Xposed框架：打开手机浏览器，百度搜索xposed installer,点击下载。
+
+![img](./img/apk_decompile_xposed_down.png)
+
+Xposed框架是一款可以在不修改APK的情况下影响程序运行(修改系统)的框架服务，基于它可以制作出许多功能强大的模块，且在功能不冲突的情况下同时运作。当前，Per APP Setting(为每个应用设置单独的dpi或修改权限)、XPrivacy(防止隐私泄露)、对原生Launcher替换图标等应用或功能均基于此框架。
+
+
+
+##### 脱壳工具FDex2
+
+通过Hook ClassLoader的loadClass方法，反射调用getDex方法取得Dex(com.android.dex.Dex类对象)，在将里面的dex写出。
+
+下载地址：
+
+链接:<https://pan.baidu.com/s/1smxtinr> 密码:dk4v
+
+安装好之后，启动xposed，在模块里面勾选FDex2工具进行激活，然后需要重启模拟器生效。
+
+![1556162224302](./img/apk_decompile_fdex2_install.png)
+
+然后运行FDex2，可以看到模拟器所有app的列表，点击需要脱壳的应用，弹出如下界面：
+
+![1556162378598](./img/apk_decompile_fdex2_run.png)
+
+然后，根据提示，重新打开运行目标APP，去dex输出目录寻找脱壳后的dex文件。如果没有生成对应的dex文件，可以多尝试几次。
+
+![1556162502152](./img/apk_decompile_fdex2_dex_out.png)
+
+
 
 #### 5.2 APK反编译：
 
 https://blog.csdn.net/s13383754499/article/details/78914592
 
-- apktool ：使用apktool反编译apk得到图片、XML配置、语言资源等文件，
+##### apktool ：
+
+使用apktool反编译apk得到图片、XML配置、语言资源等文件。
+
+apktool下载地址：<https://bitbucket.org/iBotPeaches/apktool/downloads>
+
+下载好之后得到一个如下图所示的jar文件，版本可能不一样。
+
+![img](./img/apk_decompile_apktool_jar.png)
+
+
+
+通过如下命令进行反编译：
 
 ```shell
 java -jar apktool_2.0.1.jar d -f [PATH_APK] -o [PATH_OUT]
 ```
 
-- dex2jar：使用dex2jar反编译apk得到Java源代码，将要反编译的APK后缀名改为.rar或者 .zip，并解压，得到其中的classes.dex文件（它就是java文件编译再通过dx工具打包而成的）
+![1556163358780](./img/apk_decompile_apktool_use.png)
+
+输出文件，可以看到apk的静态资源文件。
+
+![1556163447756](./img/apk_decompile_apktool_out.png)
+
+##### dex2jar：
+
+dex2jar下载地址：<http://sourceforge.net/projects/dex2jar/files/>
+
+下载完成之后，得到一个如下图所示的压缩包:
+
+![img](./img/apk_decompile_dex2jar_zip.png)
+
+使用dex2jar反编译apk得到Java源代码，将要反编译的APK后缀名改为.rar或者 .zip，并解压，得到其中的classes.dex文件（它就是java文件编译再通过dx工具打包而成的）。
+
+对于脱壳后的dex，保存到电脑，直接执行下面命令。由于有多个dex，不能确定哪一个是apk真正的源码，所以需要把每个dex都转换成jar包，然后分析代码才能知道。
 
 ```shell
 d2j-dex2jar classes.dex
 ```
 
-- jd-gui ：源码查看，IDEA亦可
+![1556163963487](./img/apk_decompile_dex2jar_run.png)
+
+执行成功后可以看到输出的jar包，这样就可以看jar包的源码了。
+
+![1556164017060](./img/apk_decompile_dex2jar_out.png)
+
+
+
+
 
 #### 5.3 JAD-反编译class文件：
 
-[利用jdk自带的jad.exe实现批量反编译class文件](https://www.cnblogs.com/flydkPocketMagic/p/7048350.html)
+通过ide读取jar包的class源码，非常不方便，可以再对class文件进行反编译得到java文件。
 
 ```shell
 jad -o -8 -r -d[PATH_OUT] -sjava [PATH_CLASS]
 ```
-
-
 
 
 
@@ -1504,3 +1884,7 @@ SDK的下载与安装：https://blog.csdn.net/zzy1078689276/article/details/8038
 Fiddler工具使用介绍：https://www.cnblogs.com/miantest/p/7289694.html
 
 App爬虫神器mitmproxy和mitmdump的使用：https://www.jianshu.com/p/b0612fcedfa1
+
+APK反编译：https://blog.csdn.net/s13383754499/article/details/78914592
+
+利用jdk自带的jad.exe实现批量反编译class文件：https://www.cnblogs.com/flydkPocketMagic/p/7048350.html
