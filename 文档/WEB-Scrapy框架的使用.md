@@ -8,13 +8,13 @@ Scrapy是一个十分强大的爬虫框架，依赖的库比较多，至少需�
 
 如果出现如下错误：
 
-![1555641478347](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/scrapy_install_error.png)
+![1555641478347](./img/scrapy_install_error.png)
 
 这是安装**Twisted导致的这个错误的发生的**，需要从**非官方版本**下载twisted并安装：
 
 https://www.lfd.uci.edu/~gohlke/pythonlibs/#twisted
 
-![1555641642742](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/scrapy_twisted_unofficial_link.png)
+![1555641642742](./img/scrapy_twisted_unofficial_link.png)
 
 下载对应版本后，通过pip安装：
 
@@ -22,7 +22,7 @@ https://www.lfd.uci.edu/~gohlke/pythonlibs/#twisted
 pip install Twisted-19.2.0-cp36-cp36m-win_amd64.whl
 ```
 
-![1555641801015](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/scrapy_twisted_install.png)
+![1555641801015](./img/scrapy_twisted_install.png)
 
 **Twisted**是用Python实现的基于事件驱动的网络引擎框架，Twisted支持许多常见的传输及应用层协议，包括TCP、UDP、SSL/TLS、HTTP、IMAP、SSH、IRC以及FTP。scrapy是基于twisted实现的。
 
@@ -42,7 +42,7 @@ scrapy startproject DoubanBook    # DoubanBook代表项目的名字
 
 用pycharm打开可以看到如下目录结构：
 
-![1555642697741](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/scrapy_startproject.png)
+![1555642697741](./img/scrapy_startproject.png)
 
 第二步：创建一个爬虫
 
@@ -55,11 +55,11 @@ scrapy genspider doubanbook book.douban.com
 
 执行成功后，可以看到spiders目录下新生成的文件：
 
-![1555643050711](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/scrapy_genspider.png)
+![1555643050711](./img/scrapy_genspider.png)
 
 打开doubanbook.py文件，可以看到scrapy框架生成的基本爬虫模板，里面定义了爬虫的名称，爬取起始url，还有一个需要完善的解析方法。
 
-![1555643256677](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/scrapy_basic_model.png)
+![1555643256677](./img/scrapy_basic_model.png)
 
 第三步：实现爬虫
 
@@ -80,7 +80,7 @@ scrapy crawl doubanbook     # doubanbook就是第二步创建爬虫时定义的�
 
 这时会出现403错误
 
-![1555644310989](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/scrapy_crawl_error_403.png)
+![1555644310989](./img/scrapy_crawl_error_403.png)
 
 这是因为豆瓣网站检测了请求是不是由浏览器发起的，不是的话会被拒绝访问，所以要让爬虫模拟浏览器请求。
 
@@ -103,7 +103,7 @@ scrapy从创建项目到运行爬虫的基本流程就是这样，详细内容�
 
 scrapy架构如图所示：
 
-![scrapy_architecture](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/scrapy_architecture.png)
+![scrapy_architecture](./img/scrapy_architecture.png)
 
 - **Scrapy Engine**: scrapy引擎，负责Spiders、ItemPipeline、Downloader、Scheduler中间的通讯，信号、数据传递等等。
 - **Scheduler(调度器)**: 它负责接受引擎发送过来的requests请求，并按照一定的方式进行整理排列、入队，等待Scrapy Engine(引擎)来请求时，交给引擎。

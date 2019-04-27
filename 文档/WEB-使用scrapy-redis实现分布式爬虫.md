@@ -16,7 +16,7 @@ pip install scrapy_redis
 
 #### 4.2 scrapy-redis基本原理
 
-![è¿éåå¾çæè¿°](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/scrapy_redis_architecture.png)
+![è¿éåå¾çæè¿°](./img/scrapy_redis_architecture.png)
 
 Scrapy-Redis分布式策略：
 

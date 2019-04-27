@@ -20,19 +20,19 @@ mitmdump是mitmproxy的命令行接口，同时还可以对接Python对请求进
 
 将mitmproxy-ca-cert.pem文件传到模拟器的sdcard：
 
-![1556098985475](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/mitmproxy_ca_adb_push.png)
+![1556098985475](./img/mitmproxy_ca_adb_push.png)
 
 然后打开模拟器设置，点击安全选项，再点击从SD卡安装选项进行安装。
 
-![1556099337529](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/mitmproxy_ca_safe.png)
+![1556099337529](./img/mitmproxy_ca_safe.png)
 
 找到push到sdcard的mitmproxy-ca-cert.cer文件，点击。
 
-![1556099410222](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/mitmproxy_ca_sdcard.png)
+![1556099410222](./img/mitmproxy_ca_sdcard.png)
 
 输入证书名称比如mitmproxy点击确定完成安装。
 
-![1556099499345](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/mitmproxy_ca_name.png)
+![1556099499345](./img/mitmproxy_ca_name.png)
 
 
 
@@ -93,7 +93,7 @@ def process_item(item):
 mitmdump -s py_name.py -p 8888
 ```
 
-![1556101658649](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/mitmproxy_mitmdump_run.png)
+![1556101658649](./img/mitmproxy_mitmdump_run.png)
 
 
 

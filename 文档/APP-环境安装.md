@@ -18,11 +18,11 @@
 
 （2）无需翻墙下载：http://www.androiddevtools.cn/
 
-![1555665777042](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/sdk_download.png)
+![1555665777042](./img/sdk_download.png)
 
 运行安装，得到如下目录：
 
-![1555665932626](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/sdk_install_1.png)
+![1555665932626](./img/sdk_install_1.png)
 
 打开SDK Manager.exe
 
@@ -30,7 +30,7 @@
 
 Android SDK Manager的主界面如下，从中可以看到许多的下载项，而该Android SDK Manager默认的下载项地址指向的是安卓官网的下载地址，在这种情况下，我们下载会出现及其卡顿的情况，甚至无法加载资源！所以说我们一般将其改成国内的下载源地址，修改方法如下，点击图示中的【Tools】，在弹出的下拉选项中选择【Options】
 
-![è¿éåå¾çæè¿°](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/sdk_manager_tools.png)
+![è¿éåå¾çæè¿°](./img/sdk_manager_tools.png)
 
 ```
 上海GDG镜像服务器
@@ -41,7 +41,7 @@ IPV4/IPV6：http://mirrors.neusoft.edu.cn  端口：80
 
 在配置好镜像服务器地址之后，再勾选图示中的“Force …”选项，然后点击【close】
 
-![1555667024129](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/sdk_proxy.png)
+![1555667024129](./img/sdk_proxy.png)
 
 **选择要安装的工具**
 
@@ -55,17 +55,17 @@ Android SDK Build-tools
 
 其中Build-tools是安卓SDK的构建工具，最少我们应该选择一个，其中该软件默认选择的是最新版的，当然我们在这里也可以同时选择多个。
 
-![1555667482854](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/sdk_tools_select.png)
+![1555667482854](./img/sdk_tools_select.png)
 
 然后选择一个Android版本下载，而在选择所要下载的Android版本时，推荐选择下载与Build-tools对应的版本。
 
 比如：
 
-![1555667719297](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/sdk_android_one.png)
+![1555667719297](./img/sdk_android_one.png)
 
 然后勾选Extras中的选项：
 
-![1555667745394](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/sdk_extras.png)
+![1555667745394](./img/sdk_extras.png)
 
 勾选完之后，直接点击【Install】选项安装。
 
@@ -77,19 +77,19 @@ Android SDK Build-tools
 
 ANDROID_HOME：配置sdk安装目录
 
-![1555666300592](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/sdk_ANDROID_HOME.png)
+![1555666300592](./img/sdk_ANDROID_HOME.png)
 
 把%ANDROID_SDK_HOME%\platform-tools;%ANDROID_SDK_HOME%\tools添加到Path环境变量中。
 
 
 
-![1555666392840](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/sdk_path.png)
+![1555666392840](./img/sdk_path.png)
 
 **检测是否安装成功**
 
 cmd中输入adb：
 
-![1555666516559](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/adk_adb_ok.png)
+![1555666516559](./img/adk_adb_ok.png)
 
 
 
@@ -147,11 +147,11 @@ pip install mitmproxy-4.0.4-py3-none-any.whl
 
 首先，运行`mitmdump`命令产生CA证书。
 
-![1555990419133](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/mitmproxy_mitmdump.png)
+![1555990419133](./img/mitmproxy_mitmdump.png)
 
 接下来，我们就可以在用户目录下的.mitmproxy目录里面找到CA证书
 
-![1555668580113](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/mitmproxy_ca.png)
+![1555668580113](./img/mitmproxy_ca.png)
 
 其中mitmproxy-ca.p12是用于windows的证书，双击即可出现证书导入页面，点击下一步即可完成安装。
 

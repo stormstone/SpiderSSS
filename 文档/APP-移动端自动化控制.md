@@ -22,11 +22,11 @@ adb connect 127.0.0.1:62001
 
 打开任务管理器详细信息，找到模拟器的PID，如下图是夜神模拟器的运行PID。
 
-![1556094297742](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/adb_task_manager_pid.png)
+![1556094297742](./img/adb_task_manager_pid.png)
 
 然后通过`netstat -ano`命令找到对应端口。夜神模拟器的默认端口从62001开始，后面都是从62025开始
 
-![1556094407567](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/abd_device_find_port.png)
+![1556094407567](./img/abd_device_find_port.png)
 
 确认adb连接上设备之后，输入
 
@@ -42,7 +42,7 @@ logcat | grep cmp=
 
 然后在模拟器中打开想要获取包名的app,就可以看到app的包名和页面的Activity了。
 
-![1556094871781](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/adb_find_activity.png)
+![1556094871781](./img/adb_find_activity.png)
 
 
 
@@ -56,7 +56,7 @@ pip install Appium-Python-Client
 
 启动appium的服务
 
-![1556097084901](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/appium_start.png)
+![1556097084901](./img/appium_start.png)
 
 操作示例代码：
 
@@ -117,11 +117,11 @@ while True:
 
 ##### uiautomatorviewer的使用
 
-![1556097553933](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/uiautomatorviewer_file.png)
+![1556097553933](./img/uiautomatorviewer_file.png)
 
 双击即可运行，点击左上角按钮即可获取模拟器页面，点击页面相应组件就可在右边获取到相应的xpath路径。
 
-![1556097647560](D:/ProjectPython/SpiderSSS/%E6%96%87%E6%A1%A3/img/uiautomatorviewer_view.png)
+![1556097647560](./img/uiautomatorviewer_view.png)
 
 
 
