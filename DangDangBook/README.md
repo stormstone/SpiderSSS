@@ -11,4 +11,4 @@
 
 2. Slave
 
-   在项目中找到client_main.py文件，直接运行
+   在项目中找到slave_main.py文件，直接运行
