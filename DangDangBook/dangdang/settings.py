@@ -70,7 +70,9 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'dangdang.pipelines.RedisLinJiaPipeline': 300,
+    # MongoDB
     'dangdang.pipelines.MongoPipeline': 200,
+    # MySQL
     # 'dangdang.pipelines.MysqlPipeline': 100,
 }
 
