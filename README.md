@@ -1,10 +1,11 @@
 # SpiderSSS
+:beetle: 一些爬虫的学习笔记资料。
 
 ### BasicLearn
 爬虫基本库学习，urllib、requests、beautifulsoup、lxml、pyquery、selenium。
 
 ### Biying
-必应高清美丽图片下载。（最多只能下载前7天图片）
+必应高清美丽图片下载。
 
 ### DangDangBook
 当当网的图书条目爬取，使用Scrapy-Redis实现分布式网络爬虫。
