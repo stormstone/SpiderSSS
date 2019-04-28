@@ -13,6 +13,9 @@
 ### [DataCmpt](/DataCmpt)
 数据比赛信息爬取。
 
+### [DoubanBook](/DoubanBook)
+豆瓣读书爬虫。
+
 ### [Music163](/Music163)
 网易云音乐用户信息爬取。
 
