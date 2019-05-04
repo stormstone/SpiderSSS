@@ -4,35 +4,27 @@
 ### [BasicLearn](/BasicLearn)
 爬虫基本库学习，urllib、requests、beautifulsoup、lxml、pyquery、selenium。
 
-<br></br>
 ### [Biying](/Biying)
 必应高清美丽图片下载。
 
-<br></br>
 ### [DangDangBook](/DangDangBook)
 当当网的图书条目爬取，使用Scrapy-Redis实现分布式网络爬虫。
 
-<br></br>
 ### [DataCmpt](/DataCmpt)
 数据比赛信息爬取。
 
-<br></br>
 ### [DoubanBook](/DoubanBook)
 豆瓣读书爬虫。
 
-<br></br>
 ### [GitstarRanking](/GitstarRanking)
 爬取GitstarRanking上用户star数前1000的用户信息并可视化分析。
 
-<br></br>
 ### [Music163](/Music163)
 网易云音乐用户信息爬取并进行可视化分析。
 
-<br></br>
 ### [Pap.er](/Pap.er)
 pap.er网站壁纸图片爬取。
 
-<br></br>
 ### [WeChat_AutoMessage](/WeChat_AutoMessage)
 使用wxpy库实现微信定时消息发送。
 
