@@ -17,6 +17,7 @@ path_df_links = 'df_links.csv'
 path_df_authors = 'df_authors.csv'
 
 
+# 解析每一期节目参加的嘉宾名字
 def parse_v(href):
     df_tmp = pd.DataFrame()
     r = requests.get(href, headers=headers)
@@ -37,6 +38,7 @@ def parse_v(href):
     return df_tmp
 
 
+# 获取所有期节目的链接
 def get_links_v():
     r = requests.get(start_url, headers=headers)
     soup = BeautifulSoup(r.text, 'lxml')
@@ -50,6 +52,7 @@ def get_links_v():
     df_links.to_csv(path_df_links, index=False)
 
 
+# 循环获取每一期的嘉宾
 def get_authors():
     if os.path.exists(path_df_authors):
         df_authors = pd.read_csv(path_df_authors)
