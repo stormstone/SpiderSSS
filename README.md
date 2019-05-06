@@ -35,6 +35,9 @@
 ### [GitstarRanking](/GitstarRanking)
 爬取GitstarRanking上用户star数前1000的用户信息并可视化分析。
 
+### [HappyCamp](/HappyCamp)
+快乐大本营嘉宾爬虫。
+
 ### [Music163](/Music163)
 网易云音乐用户信息爬取并进行可视化分析。
 
