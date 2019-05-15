@@ -26,9 +26,13 @@
 
 打开SDK Manager.exe
 
-**配置国内的镜像服务器地址**
 
-Android SDK Manager的主界面如下，从中可以看到许多的下载项，而该Android SDK Manager默认的下载项地址指向的是安卓官网的下载地址，在这种情况下，我们下载会出现及其卡顿的情况，甚至无法加载资源！所以说我们一般将其改成国内的下载源地址，修改方法如下，点击图示中的【Tools】，在弹出的下拉选项中选择【Options】
+
+现在不需要配置镜像服务器地址了！
+
+~~**配置国内的镜像服务器地址**~~
+
+~~Android SDK Manager的主界面如下，从中可以看到许多的下载项，而该Android SDK Manager默认的下载项地址指向的是安卓官网的下载地址，在这种情况下，我们下载会出现及其卡顿的情况，甚至无法加载资源！所以说我们一般将其改成国内的下载源地址，修改方法如下，点击图示中的【Tools】，在弹出的下拉选项中选择【Options】~~
 
 ![è¿éåå¾çæè¿°](./img/sdk_manager_tools.png)
 
@@ -39,9 +43,12 @@ sdk.gdgshanghai.com   端口：8000
 IPV4/IPV6：http://mirrors.neusoft.edu.cn  端口：80
 ```
 
-在配置好镜像服务器地址之后，再勾选图示中的“Force …”选项，然后点击【close】
+~~在配置好镜像服务器地址之后，再勾选图示中的“Force …”选项，然后点击【close】~~
+
 
 ![1555667024129](./img/sdk_proxy.png)
+
+
 
 **选择要安装的工具**
 
@@ -79,7 +86,7 @@ ANDROID_HOME：配置sdk安装目录
 
 ![1555666300592](./img/sdk_ANDROID_HOME.png)
 
-把%ANDROID_SDK_HOME%\platform-tools;%ANDROID_SDK_HOME%\tools添加到Path环境变量中。
+把%ANDROID_HOME%\platform-tools;%ANDROID_HOME%\tools添加到Path环境变量中。
 
 
 
