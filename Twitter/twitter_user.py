@@ -5,6 +5,7 @@ import time
 import pymysql
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from .config import *
 
 eventlet.monkey_patch()
 
@@ -15,14 +16,6 @@ chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument("--proxy-server=http://127.0.0.1:2080")
 driver = webdriver.Chrome(options=chrome_options)
 
-host = '127.0.0.1'
-user = 'root'
-psd = '123456'
-db = 'spiders'
-c = 'utf8'
-port = 3306
-
-path_img = './imgs/'
 base_url = 'https://twitter.com/'
 
 
@@ -132,6 +125,5 @@ if __name__ == '__main__':
                           port=port)
     cue = con.cursor()
 
-    username = 'kaifulee'
     get_users_media_driver(username)
     down_img(username)
