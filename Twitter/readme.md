@@ -1,5 +1,8 @@
 # Twitter 用户图片爬虫
 
+![show](show.png)
+
+
     selenium
     urllib
     mysql
