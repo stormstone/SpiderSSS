@@ -5,7 +5,7 @@ import time
 import pymysql
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from .config import *
+from config import *
 
 eventlet.monkey_patch()
 
@@ -22,10 +22,10 @@ base_url = 'https://twitter.com/'
 # urllib 获取图片并保存
 def save_img(path_img, url, save_name):
     file_name_full = path_img + save_name + '.png'
-    if os.path.exists(file_name_full):
+    if os.path.exists(file_name_full) and os.path.getsize(file_name_full) > 0:
         print('pic:' + save_name + '.png exists')
         return 1
-    with eventlet.Timeout(10, False):  # 设置超时时间为10秒
+    with eventlet.Timeout(TIME_OUT, False):  # 设置超时时间为10秒
         bytes = urllib.request.urlopen(url)
         f = open(file_name_full, 'wb')
         f.write(bytes.read())
@@ -45,7 +45,7 @@ def save_img_src(img_src):
         if '400x400' in str(img_src):
             save_name = username + '_avatar'
         else:
-            return
+            return 1
     elif 'emoji' in str(img_src):
         save_name = 'emoji_' + str(str(img_src).split('/')[-1][:-4])
     else:
@@ -107,7 +107,8 @@ def down_img(username=None):
         cue.execute("select count(*) from twitter_img where is_crawled = 0")
     count_all = cue.fetchone()[0]
     print('down img count all:', count_all)
-    for i in range(count_all):
+    count = 0
+    while count < count_all:
         if username:
             cue.execute(
                 "select img_src from twitter_img where username = '" + username + "' and is_crawled = 0 limit 1")
@@ -118,12 +119,16 @@ def down_img(username=None):
         if r:
             cue.execute("update twitter_img set is_crawled = 1 where img_src = (%s)", img_src)
             con.commit()
+            count += 1
 
 
 if __name__ == '__main__':
     con = pymysql.connect(host=host, user=user, passwd=psd, db=db, charset=c,
                           port=port)
     cue = con.cursor()
+    path_img = PATH_IMGS + '/' + username + '/'
+    if not os.path.exists(path_img):
+        os.makedirs(path_img)
 
     get_users_media_driver(username)
     down_img(username)

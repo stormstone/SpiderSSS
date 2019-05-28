@@ -12,7 +12,8 @@
 
 ```python
 # 待爬取用户名
-username = 'kaifulee'
+username = 'iamlonglongs'
+
 # MySQL配置
 host = '127.0.0.1'
 user = 'root'
@@ -20,6 +21,11 @@ psd = '123456'
 db = 'spiders'
 c = 'utf8'
 port = 3306
+
 # 图片存储路径
-path_img = './imgs/'
+PATH_IMGS = './imgs/'
+
+# 下载图片超时时间（s）
+TIME_OUT = 20
+
 ```
