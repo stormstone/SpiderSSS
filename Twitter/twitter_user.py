@@ -13,7 +13,7 @@ chrome_options = Options()
 chrome_options.add_argument('--headless')  # 使用无头谷歌浏览器模式
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument("--proxy-server=http://127.0.0.1:2080")
+chrome_options.add_argument("--proxy-server=" + proxy_server)
 driver = webdriver.Chrome(options=chrome_options)
 
 base_url = 'https://twitter.com/'

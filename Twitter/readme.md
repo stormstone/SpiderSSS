@@ -17,6 +17,9 @@
 # 待爬取用户名
 username = 'iamlonglongs'
 
+# 代理
+proxy_server = 'http://127.0.0.1:2080'
+
 # MySQL配置
 host = '127.0.0.1'
 user = 'root'
