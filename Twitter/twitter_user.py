@@ -89,6 +89,7 @@ def get_users_media_driver(username):
         lst_end = driver.find_elements_by_xpath('//div[@class="stream-end-inner"]')
         lst_no_end = driver.find_elements_by_xpath('//div[@class="timeline-end has-items has-more-items"]')
 
+    # 获取所有图片链接
     lst_img = [img.get_attribute('src') for img in driver.find_elements_by_xpath('//img')]
     lst_img = list(set(lst_img))
     count_all = len(lst_img)
@@ -97,6 +98,7 @@ def get_users_media_driver(username):
         img_src = lst_img[count]
         print(username, count, '/', count_all, img_src)
         if img_src != None:
+            # 插入到数据库
             insert_user_info(username, img_src)
 
 
@@ -109,14 +111,16 @@ def down_img(username=None):
     print('down img count all:', count_all)
     count = 0
     while count < count_all:
+        # 随机返回一条未爬取的图片链接
         if username:
             cue.execute(
-                "select img_src from twitter_img where username = '" + username + "' and is_crawled = 0 limit 1")
+                "select img_src from twitter_img where username = '" + username + "' and is_crawled = 0 ORDER BY RAND() limit 1")
         else:
-            cue.execute("select img_src from twitter_img where is_crawled = 0 limit 1")
+            cue.execute("select img_src from twitter_img where is_crawled = 0 ORDER BY RAND() limit 1")
         img_src = cue.fetchone()[0]
         r = save_img_src(img_src)
         if r:
+            # 标记为已爬取
             cue.execute("update twitter_img set is_crawled = 1 where img_src = (%s)", img_src)
             con.commit()
             count += 1
