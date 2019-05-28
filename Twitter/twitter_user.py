@@ -38,7 +38,6 @@ def save_img(path_img, url, save_name):
 
 # 图片保存命名
 def save_img_src(img_src):
-    print(img_src)
     if 'profile_banners' in str(img_src):
         save_name = username + '_banner'
     elif 'profile_images' in str(img_src):
@@ -118,6 +117,7 @@ def down_img(username=None):
         else:
             cue.execute("select img_src from twitter_img where is_crawled = 0 ORDER BY RAND() limit 1")
         img_src = cue.fetchone()[0]
+        print(username, count, '/', count_all, img_src)
         r = save_img_src(img_src)
         if r:
             # 标记为已爬取
@@ -130,9 +130,10 @@ if __name__ == '__main__':
     con = pymysql.connect(host=host, user=user, passwd=psd, db=db, charset=c,
                           port=port)
     cue = con.cursor()
-    path_img = PATH_IMGS + '/' + username + '/'
-    if not os.path.exists(path_img):
-        os.makedirs(path_img)
+    for username in lst_usernames:
+        path_img = PATH_IMGS + '/' + username + '/'
+        if not os.path.exists(path_img):
+            os.makedirs(path_img)
 
-    get_users_media_driver(username)
-    down_img(username)
+        get_users_media_driver(username)
+        down_img(username)

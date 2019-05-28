@@ -15,7 +15,7 @@
 
 ```python
 # 待爬取用户名
-username = 'iamlonglongs'
+lst_usernames = ['iamlonglongs']
 
 # 代理
 proxy_server = 'http://127.0.0.1:2080'
