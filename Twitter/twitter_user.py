@@ -73,6 +73,13 @@ def get_users_media_driver(username):
     print('driver get url:', start_url)
     driver.get(start_url)
 
+    timeline_ok = driver.find_elements_by_xpath('//div[@class="ProfileTimeline "]')
+    print(timeline_ok)
+    if len(timeline_ok) < 1:
+        print(username, '媒体页面加载失败')
+        lst_usernames.append(username)  # 放到序列后面再次尝试
+        return
+
     # 判断是否滑到最后了
     lst_end = driver.find_elements_by_xpath('//div[@class="timeline-end has-items"]')
     lst_no_end = driver.find_elements_by_xpath('//div[@class="timeline-end has-items has-more-items"]')
@@ -83,7 +90,7 @@ def get_users_media_driver(username):
         js = "window.scrollTo(0,document.body.scrollHeight)"
         driver.execute_script(js)
         count_scroll += 1
-        print('scroll:', count_scroll)
+        print(username, 'scroll:', count_scroll)
         time.sleep(2)
         lst_end = driver.find_elements_by_xpath('//div[@class="stream-end-inner"]')
         lst_no_end = driver.find_elements_by_xpath('//div[@class="timeline-end has-items has-more-items"]')
@@ -130,10 +137,14 @@ if __name__ == '__main__':
     con = pymysql.connect(host=host, user=user, passwd=psd, db=db, charset=c,
                           port=port)
     cue = con.cursor()
-    for username in lst_usernames:
-        path_img = PATH_IMGS + '/' + username + '/'
-        if not os.path.exists(path_img):
-            os.makedirs(path_img)
 
-        get_users_media_driver(username)
-        down_img(username)
+    if TYPE_DB_OR_IMG == 1:
+        for username in lst_usernames:
+            get_users_media_driver(username)
+
+    elif TYPE_DB_OR_IMG == 2:
+        for username in lst_usernames:
+            path_img = PATH_IMGS + '/' + username + '/'
+            if not os.path.exists(path_img):
+                os.makedirs(path_img)
+            down_img(username)
