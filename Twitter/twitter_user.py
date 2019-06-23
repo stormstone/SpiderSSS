@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
     elif TYPE_DB_OR_IMG == 2:
         for username in lst_usernames:
-            path_img = PATH_IMGS + '/' + username + '/'
+            path_img = PATH_IMGS + username + '/'
             if not os.path.exists(path_img):
                 os.makedirs(path_img)
             down_img(username)
