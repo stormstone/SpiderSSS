@@ -85,7 +85,7 @@ def get_users_media_driver(username):
     lst_no_end = driver.find_elements_by_xpath('//div[@class="timeline-end has-items has-more-items"]')
 
     count_scroll = 0
-    while len(lst_end) < 1 or len(lst_no_end) > 0:
+    while len(lst_end) < 1 or len(lst_no_end) > 0 and count_scroll < 200:  # 限制滑动次数
         # 滑倒底
         js = "window.scrollTo(0,document.body.scrollHeight)"
         driver.execute_script(js)
