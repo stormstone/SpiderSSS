@@ -1,14 +1,21 @@
 # Pinterest 图片爬虫
 
+![show](zzf.png)
+
+妹妹太漂亮太可爱了！:heart_eyes: :heart_eyes: :heart_eyes:
+
+
 ![show](show.png)
+
 
 
     selenium
     urllib
     mysql
 
-
 首先把图片链接存入MySQL，然后下载每张图片。
+
+
 
 配置文件内容：config.py
 
@@ -39,5 +46,4 @@ psd = '123456'
 db = 'spiders'
 c = 'utf8'
 port = 3306
-
 ```

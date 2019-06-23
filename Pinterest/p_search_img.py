@@ -54,6 +54,7 @@ def search(search_text):
 
     # 获取所有图片链接
     lst_img = [img.get_attribute('src') for img in driver.find_elements_by_xpath('//img')]
+    # 换成大图
     lst_img = [re.sub('236x', '564x', i) for i in lst_img]
     lst_img = list(set(lst_img))
     count_all = len(lst_img)
