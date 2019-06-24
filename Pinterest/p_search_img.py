@@ -44,7 +44,7 @@ def search(search_text):
     time.sleep(1)
 
     count_scroll = 0
-    while count_scroll < 20:  # 限制滑动次数
+    while count_scroll < 2:  # 限制滑动次数
         # 滑倒底
         js = "window.scrollTo(0,document.body.scrollHeight)"
         driver.execute_script(js)
@@ -129,7 +129,8 @@ if __name__ == '__main__':
 
     if TYPE_DB_OR_IMG == 1:
         for search_text in lst_search_text:
-            search(search_text)
+            while True:
+                search(search_text)
 
     elif TYPE_DB_OR_IMG == 2:
         for search_text in lst_search_text:
