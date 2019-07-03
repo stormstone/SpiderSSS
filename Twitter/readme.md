@@ -39,4 +39,4 @@ port = 3306
 ```
 
 多进程下载图片：
-执行 `pool_mail.py`
+执行 `pool_main.py`
