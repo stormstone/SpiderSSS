@@ -6,4 +6,10 @@
     requests
     BeautifulSoup
     pandas
+
     
+spider_user.py：获取所有1000个用户的用户名、排名、star数
+
+spider_github_user.py：爬取用户信息    
+
+analysis.ipynb：可视化分析
