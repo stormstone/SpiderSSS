@@ -19,4 +19,4 @@ while hasNextPage:
         df_res = df_res.append([[i for i in cmpt.values()]])
 
 df_res.columns = lst_keys
-df_res.to_csv('df_dc.csv', index=False, encoding='utf8')
+df_res.to_csv('../data/df_dc.csv', index=False, encoding='utf8')
