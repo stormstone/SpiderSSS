@@ -13,9 +13,10 @@ driver.find_element_by_id("search").click()
 time.sleep(3)
 
 df_ceic = pd.DataFrame()
+max_pages = 1  # 翻页次数，爬取最新只需爬取第一页数据
 page = 1
 tmp_gap = 6
-while page <= 393:
+while page <= max_pages:
     page += 1
     df_tmp = pd.DataFrame()
     lst_trs = driver.find_elements_by_xpath("//tr")
@@ -32,4 +33,4 @@ while page <= 393:
 
 driver.close()
 df_ceic.columns = ['震级', '发震时刻', '纬度', '经度', '深度', '参考位置']
-df_ceic.to_csv('./data/df_ceic.csv', index=False)
+df_ceic.to_csv('./data/df_ceic_tmp.csv', index=False)
