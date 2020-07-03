@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import urllib
+import requests
 import json
 from multiprocessing.pool import Pool as ThreadPool
 
@@ -8,7 +8,8 @@ from multiprocessing.pool import Pool as ThreadPool
 # 发起请求获得json数据
 def get_json(url):
     try:
-        return urllib.request.urlopen(url).read()
+        res = requests.get(url).text
+        return res
     except:
         print('cannot read %s' % url)
         return None
@@ -45,7 +46,7 @@ def downloadfile(tup_nu):
     if url == None or name == None:
         return None
 
-    text = urllib.request.urlopen(url).read()
+    text = requests.get(url).content
     name = name.replace('/', '_')
     f = open('pic/' + name, 'wb+')
     f.write(text)
