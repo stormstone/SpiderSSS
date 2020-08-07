@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
+import os
+
 import requests
 from lxml import etree
 
 
 # 下载图片
-def downloadfile(img_src):
+def downloadfile(img_src, img_name):
     print('start download:', img_src)
     text = requests.get(img_src).content
-    f = open('pic/' + img_src.split('/')[-1], 'wb+')
+    f = open('pic/' + img_name, 'wb+')
     f.write(text)
     f.close()
 
@@ -28,7 +30,9 @@ def main():
                 page_html = etree.HTML(page_txt)
                 img_src = page_html.xpath('//div[@class="czr-wp-the-content"]//img//@data-src')
                 for img in img_src:
-                    downloadfile(img)
+                    if os.path.exists('pic/' + img.split('/')[-1]):
+                        continue
+                    downloadfile(img, img.split('/')[-1])
 
 
 if __name__ == '__main__':
