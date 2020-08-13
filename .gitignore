@@ -1,5 +1,6 @@
 .idea
 .ipynb_checkpoints
+.virtual_documents
 pic
 Music163/data
 Pap.er/img
@@ -15,3 +16,4 @@ ZhiHu/question_answers
 ZhiHu/tttttt.html
 ZhiHu/tttttt.js
 Earthquakes/data
+CSAIR/data
